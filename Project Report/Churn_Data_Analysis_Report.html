@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Churn — Executive Summary Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink-soft: #2d2d4a;
+  --ink-muted: #6b6b8a;
+  --paper: #fdfcf8;
+  --cream: #f5f2ea;
+  --rule: #e4e0d4;
+  --churn: #c0392b;
+  --churn-pale: #fdf0ed;
+  --retain: #1a7a4a;
+  --retain-pale: #edf6f1;
+  --accent: #2c3e7a;
+  --accent-pale: #eef0f8;
+  --gold: #b8860b;
+  --gold-pale: #fdf8e8;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Source Serif 4', serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.page {
+  max-width: 860px;
+  margin: 40px auto;
+  background: var(--paper);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.12);
+}
+
+/* ── COVER ── */
+.cover {
+  background: var(--ink);
+  color: white;
+  padding: 80px 64px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg, transparent, transparent 40px,
+    rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 80px
+  );
+}
+.cover-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 24px;
+}
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px; font-weight: 900; line-height: 1.1;
+  letter-spacing: -1px; margin-bottom: 16px;
+}
+.cover-title span { color: #ff7675; }
+.cover-sub {
+  font-size: 18px; color: rgba(255,255,255,0.65);
+  font-weight: 300; margin-bottom: 48px;
+}
+.cover-meta-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 24px; border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 36px;
+}
+.cover-meta { }
+.cm-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700; color: #ff7675;
+}
+.cm-label { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+/* ── BODY ── */
+.body-content { padding: 56px 64px; }
+.section { margin-bottom: 48px; }
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink-muted); display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--rule);
+}
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700; color: var(--ink);
+  line-height: 1.2; margin-bottom: 20px;
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; color: var(--ink-soft);
+  margin: 28px 0 10px;
+}
+p { color: var(--ink-soft); margin-bottom: 16px; }
+strong { color: var(--ink); }
+
+/* Lead paragraph */
+.lead {
+  font-size: 18px; line-height: 1.7; color: var(--ink);
+  border-left: 4px solid var(--accent); padding-left: 20px;
+  margin-bottom: 24px;
+}
+
+/* KPI mini cards */
+.kpi-row {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  margin: 24px 0;
+}
+.kpi-mini {
+  border: 1px solid var(--rule); border-radius: 8px; padding: 16px 20px;
+  background: var(--cream);
+}
+.kpi-mini.danger { border-color: var(--churn); background: var(--churn-pale); }
+.kpi-mini.safe { border-color: var(--retain); background: var(--retain-pale); }
+.kpi-mini.info { border-color: var(--accent); background: var(--accent-pale); }
+.kpi-mini.warn { border-color: var(--gold); background: var(--gold-pale); }
+.km-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-muted); margin-bottom: 4px; }
+.km-val { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+.kpi-mini.danger .km-val { color: var(--churn); }
+.kpi-mini.safe .km-val { color: var(--retain); }
+.kpi-mini.info .km-val { color: var(--accent); }
+.kpi-mini.warn .km-val { color: var(--gold); }
+.km-note { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+
+/* Data table */
+.data-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;
+}
+.data-table th {
+  background: var(--ink); color: white; padding: 10px 16px;
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px;
+  text-transform: uppercase; text-align: left;
+}
+.data-table th:first-child { border-radius: 6px 0 0 0; }
+.data-table th:last-child { border-radius: 0 6px 0 0; }
+.data-table td {
+  padding: 10px 16px; border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+}
+.data-table tr:nth-child(even) td { background: var(--cream); }
+.data-table tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+.data-table tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+.rate-high { color: var(--churn); font-weight: 600; }
+.rate-med { color: var(--gold); font-weight: 600; }
+.rate-low { color: var(--retain); font-weight: 600; }
+
+/* Risk bar */
+.risk-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+.risk-fill-high { background: var(--churn); }
+.risk-fill-med { background: var(--gold); }
+.risk-fill-low { background: var(--retain); }
+
+/* Finding cards */
+.finding {
+  display: flex; gap: 16px; padding: 20px;
+  background: var(--cream); border-radius: 10px;
+  border-left: 4px solid var(--accent);
+  margin-bottom: 12px;
+}
+.finding.alert { border-left-color: var(--churn); background: var(--churn-pale); }
+.finding.positive { border-left-color: var(--retain); background: var(--retain-pale); }
+.finding-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.finding-content .fc-title { font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.finding-content .fc-body { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
+
+/* Rec cards */
+.rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+.rec-card {
+  border: 1px solid var(--rule); border-radius: 10px; padding: 20px;
+  background: var(--paper);
+}
+.rc-priority {
+  display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace;
+  letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; margin-bottom: 10px; font-weight: 500;
+}
+.rc-priority.p1 { background: var(--churn-pale); color: var(--churn); }
+.rc-priority.p2 { background: var(--gold-pale); color: var(--gold); }
+.rc-priority.p3 { background: var(--accent-pale); color: var(--accent); }
+.rc-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.rc-body { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+.rc-impact { margin-top: 10px; font-size: 12px; color: var(--retain); font-weight: 600; }
+
+/* Steps */
+.steps { counter-reset: steps; list-style: none; margin: 16px 0; }
+.steps li {
+  counter-increment: steps; padding: 14px 16px 14px 52px;
+  position: relative; border-bottom: 1px solid var(--rule);
+  font-size: 14px; color: var(--ink-soft);
+}
+.steps li::before {
+  content: counter(steps);
+  position: absolute; left: 16px; top: 12px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink); color: white;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.steps li b { color: var(--ink); display: block; margin-bottom: 2px; }
+
+/* Callout */
+.callout {
+  border: 2px solid var(--accent); border-radius: 10px;
+  padding: 24px 28px; background: var(--accent-pale);
+  margin: 24px 0;
+}
+.callout-title {
+  font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700;
+  color: var(--accent); margin-bottom: 8px;
+}
+.callout p { color: var(--accent); margin: 0; font-size: 15px; }
+
+/* Footer */
+.report-footer {
+  border-top: 2px solid var(--ink); padding: 24px 64px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-muted);
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-label">Executive Summary Report · Confidential</div>
+  <div class="cover-title">Customer <span>Churn</span><br>Analysis Report</div>
+  <div class="cover-sub">A comprehensive analysis of customer attrition, key risk drivers,<br>and strategic recommendations for improving retention.</div>
+  <div class="cover-meta-grid">
+    <div class="cover-meta">
+      <div class="cm-val">7,043</div>
+      <div class="cm-label">Total Customers</div>
+    </div>
+    <div class="cover-meta">
+      <div class="cm-val">26.54%</div>
+      <div class="cm-label">Overall Churn Rate</div>
+    </div>
+    <div class="cover-meta">
+      <div class="cm-val">1,869</div>
+      <div class="cm-label">Churned Customers</div>
+    </div>
+    <div class="cover-meta">
+      <div class="cm-val">$74.44</div>
+      <div class="cm-label">Avg Charge (Churned)</div>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body-content">
+
+  <!-- 1. EXECUTIVE OVERVIEW -->
+  <div class="section">
+    <div class="section-label">01 · Executive Overview</div>
+    <h2>The Churn Problem at a Glance</h2>
+    <p class="lead">Of 7,043 customers analyzed, <strong>1,869 (26.54%)</strong> have churned — more than one in four customers. Churned customers carry a significantly higher average monthly charge of <strong>$74.44</strong> versus $61.27 for retained customers, suggesting the business is losing its most commercially valuable subscribers.</p>
+    <p>This report synthesizes the complete customer churn dataset to identify the root causes of attrition, the segments at greatest risk, and the interventions most likely to reverse the trend. The findings point to a small set of highly actionable levers — primarily around contract structure, internet service quality, and early onboarding — that together have the potential to materially reduce churn.</p>
+    <p>The analysis is based on 21 customer attributes spanning demographics, service subscriptions, billing preferences, and contract terms. No significant data quality issues were found following the correction of 11 null TotalCharges values (all associated with zero-tenure customers).</p>
+  </div>
+
+  <!-- 2. KEY METRICS -->
+  <div class="section">
+    <div class="section-label">02 · Key Metrics &amp; KPIs</div>
+    <h2>Performance Snapshot</h2>
+    <div class="kpi-row">
+      <div class="kpi-mini danger">
+        <div class="km-label">Overall Churn Rate</div>
+        <div class="km-val">26.54%</div>
+        <div class="km-note">1,869 of 7,043 customers lost</div>
+      </div>
+      <div class="kpi-mini safe">
+        <div class="km-label">Retention Rate</div>
+        <div class="km-val">73.46%</div>
+        <div class="km-note">5,174 customers retained</div>
+      </div>
+      <div class="kpi-mini info">
+        <div class="km-label">Avg Tenure — Retained</div>
+        <div class="km-val">37.6 months</div>
+        <div class="km-note">vs 18.0 months for churned (−52%)</div>
+      </div>
+      <div class="kpi-mini warn">
+        <div class="km-label">Avg Monthly Charge — Churned</div>
+        <div class="km-val">$74.44</div>
+        <div class="km-note">vs $61.27 for retained (+21.5%)</div>
+      </div>
+    </div>
+    <p>A critical observation is the inverse relationship between tenure and churn propensity. Churned customers have been with the company for an average of just 18 months, compared to 37.6 months for those who remain. This underscores how the first two years of a customer relationship are the most precarious and commercially vital.</p>
+  </div>
+
+  <!-- 3. ROOT CAUSE ANALYSIS -->
+  <div class="section">
+    <div class="section-label">03 · Root Cause Analysis</div>
+    <h2>What Is Driving Churn?</h2>
+    <p>Five primary drivers account for the vast majority of churn risk. Each is measurable, and each has a clear corresponding intervention.</p>
+
+    <div class="finding alert">
+      <div class="finding-icon">📋</div>
+      <div class="finding-content">
+        <div class="fc-title">Driver 1: Month-to-Month Contracts (Strongest Predictor)</div>
+        <div class="fc-body">Customers on month-to-month contracts churn at a staggering <strong>42.7%</strong> — compared to just 11.3% for one-year and 2.8% for two-year contracts. Of the 1,869 churned customers, <strong>1,655 (88.6%) were on month-to-month terms</strong>. This single factor is the most powerful lever in the entire dataset.</div>
+      </div>
+    </div>
+
+    <div class="finding alert">
+      <div class="finding-icon">📡</div>
+      <div class="finding-content">
+        <div class="fc-title">Driver 2: Fiber Optic Internet Dissatisfaction</div>
+        <div class="fc-body">Fiber optic customers churn at <strong>41.9%</strong> — more than double the DSL rate (19.0%) and nearly six times those with no internet service (7.4%). Given that fiber optic typically carries a premium price, this pattern strongly implies a perceived value gap: customers are paying more but not feeling satisfied enough to stay.</div>
+      </div>
+    </div>
+
+    <div class="finding alert">
+      <div class="finding-icon">🛡️</div>
+      <div class="finding-content">
+        <div class="fc-title">Driver 3: Absence of Value-Added Services</div>
+        <div class="fc-body">Customers without <strong>Online Security</strong> churn at 41.8% vs 14.6% with it. Customers lacking <strong>Tech Support</strong> churn at 41.6% vs 15.2%. These aren't marginal differences — they represent a near-tripling of churn risk. Customers who invest in the broader service ecosystem are far more embedded and less likely to leave.</div>
+      </div>
+    </div>
+
+    <div class="finding alert">
+      <div class="finding-icon">💳</div>
+      <div class="finding-content">
+        <div class="fc-title">Driver 4: Electronic Check Payment Method</div>
+        <div class="fc-body">Electronic check users churn at <strong>45.3%</strong> — by far the highest of any payment method. Automatic methods (bank transfer: 16.7%, credit card: 15.2%) correlate with much lower churn. This likely reflects a behavioral commitment signal: customers who set up automatic payments are more engaged and invested in the service.</div>
+      </div>
+    </div>
+
+    <div class="finding alert">
+      <div class="finding-icon">⏱️</div>
+      <div class="finding-content">
+        <div class="fc-title">Driver 5: Early Tenure Vulnerability (0–12 months)</div>
+        <div class="fc-body">Customers in their <strong>first year churn at 47.7%</strong> — nearly half. The rate drops dramatically with time: 28.7% at 13–24 months, 20.4% at 25–48 months, and just 9.5% for customers beyond 49 months. The first 12 months represent the most critical window for retention investment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SEGMENT BREAKDOWN -->
+  <div class="section">
+    <div class="section-label">04 · Customer Segment Breakdown</div>
+    <h2>Who Is Churning?</h2>
+
+    <h3>By Contract Type</h3>
+    <table class="data-table">
+      <thead><tr><th>Contract</th><th>Total Customers</th><th>Churned</th><th>Churn Rate</th><th>Risk Level</th></tr></thead>
+      <tbody>
+        <tr><td>Month-to-month</td><td>3,875</td><td>1,655</td><td class="rate-high">42.7%</td><td><div class="risk-bar"><div class="risk-fill-high" style="width:85%"></div></div></td></tr>
+        <tr><td>One year</td><td>1,473</td><td>166</td><td class="rate-med">11.3%</td><td><div class="risk-bar"><div class="risk-fill-med" style="width:23%"></div></div></td></tr>
+        <tr><td>Two year</td><td>1,695</td><td>48</td><td class="rate-low">2.8%</td><td><div class="risk-bar"><div class="risk-fill-low" style="width:6%"></div></div></td></tr>
+      </tbody>
+    </table>
+
+    <h3>By Internet Service</h3>
+    <table class="data-table">
+      <thead><tr><th>Service</th><th>Total</th><th>Churned</th><th>Churn Rate</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td>Fiber optic</td><td>3,096</td><td>1,297</td><td class="rate-high">41.9%</td><td><div class="risk-bar"><div class="risk-fill-high" style="width:84%"></div></div></td></tr>
+        <tr><td>DSL</td><td>2,421</td><td>459</td><td class="rate-med">19.0%</td><td><div class="risk-bar"><div class="risk-fill-med" style="width:38%"></div></div></td></tr>
+        <tr><td>No Internet</td><td>1,526</td><td>113</td><td class="rate-low">7.4%</td><td><div class="risk-bar"><div class="risk-fill-low" style="width:15%"></div></div></td></tr>
+      </tbody>
+    </table>
+
+    <h3>By Demographics</h3>
+    <table class="data-table">
+      <thead><tr><th>Segment</th><th>Total</th><th>Churned</th><th>Churn Rate</th></tr></thead>
+      <tbody>
+        <tr><td>Senior Citizens</td><td>1,142</td><td>476</td><td class="rate-high">41.7%</td></tr>
+        <tr><td>Non-Senior Customers</td><td>5,901</td><td>1,393</td><td class="rate-med">23.6%</td></tr>
+        <tr><td>Male</td><td>3,555</td><td>930</td><td>26.2%</td></tr>
+        <tr><td>Female</td><td>3,488</td><td>939</td><td>26.9%</td></tr>
+      </tbody>
+    </table>
+    <p>Gender shows negligible difference in churn (26.2% vs 26.9%), confirming that gender-targeted interventions would have limited impact. Senior citizens, however, are notably more at risk — a segment that may need dedicated service support or simplified plans.</p>
+
+    <h3>By Tenure Cohort</h3>
+    <table class="data-table">
+      <thead><tr><th>Tenure</th><th>Churn Rate</th><th>Insight</th></tr></thead>
+      <tbody>
+        <tr><td>0–12 months</td><td class="rate-high">47.7%</td><td>Critical risk window — nearly half leave</td></tr>
+        <tr><td>13–24 months</td><td class="rate-high">28.7%</td><td>Still elevated — intervention still effective</td></tr>
+        <tr><td>25–48 months</td><td class="rate-med">20.4%</td><td>Declining risk as loyalty builds</td></tr>
+        <tr><td>49–72 months</td><td class="rate-low">9.5%</td><td>Long-tenure customers are well embedded</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. TRENDS & PATTERNS -->
+  <div class="section">
+    <div class="section-label">05 · Trends &amp; Patterns</div>
+    <h2>Key Patterns Observed</h2>
+
+    <div class="finding">
+      <div class="finding-icon">📈</div>
+      <div class="finding-content">
+        <div class="fc-title">Higher Charges, Higher Churn</div>
+        <div class="fc-body">Churned customers pay $13.17 more per month on average. This represents a value-perception gap — customers paying premium prices are not feeling premium value, making them more likely to seek alternatives.</div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-icon">🔒</div>
+      <div class="finding-content">
+        <div class="fc-title">Automatic Payment as a Loyalty Proxy</div>
+        <div class="fc-body">Electronic check users churn at 45.3%, while automatic payment users (bank transfer or credit card) churn at only 15–17%. Customers who set up automatic payments exhibit higher behavioral commitment, suggesting this is both a cause and a symptom of engagement.</div>
+      </div>
+    </div>
+
+    <div class="finding positive">
+      <div class="finding-icon">✅</div>
+      <div class="finding-content">
+        <div class="fc-title">Service Bundles Create Stickiness</div>
+        <div class="fc-body">Customers enrolled in Online Security, Tech Support, or Online Backup consistently show churn rates 25–28 percentage points lower than those without. Bundle adoption is one of the strongest indicators of long-term retention.</div>
+      </div>
+    </div>
+
+    <div class="finding positive">
+      <div class="finding-icon">📅</div>
+      <div class="finding-content">
+        <div class="fc-title">Loyalty Compounds Over Time</div>
+        <div class="fc-body">Churn drops from 47.7% in year one to just 9.5% after 49 months. Customers who survive the initial vulnerability period become significantly more loyal — the challenge is getting them there. Each month of tenure substantially de-risks the customer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. RECOMMENDATIONS -->
+  <div class="section">
+    <div class="section-label">06 · Strategic Recommendations</div>
+    <h2>Actionable Interventions</h2>
+    <p>The following recommendations are ranked by expected impact and feasibility, derived directly from the most significant churn drivers identified in the analysis.</p>
+    <div class="rec-grid">
+      <div class="rec-card">
+        <div class="rc-priority p1">Priority 1 — Immediate</div>
+        <div class="rc-title">Convert Month-to-Month Customers</div>
+        <div class="rc-body">Launch targeted upgrade campaigns offering meaningful incentives (free months, price locks, service add-ons) to move month-to-month customers to annual or biannual contracts. Even partial success here would have outsized impact, given that 88.6% of churned customers held month-to-month contracts.</div>
+        <div class="rc-impact">↓ Potential churn reduction: 30–40% if 30% convert to annual</div>
+      </div>
+      <div class="rec-card">
+        <div class="rc-priority p1">Priority 1 — Immediate</div>
+        <div class="rc-title">First-Year Onboarding Program</div>
+        <div class="rc-body">Deploy a structured 12-month engagement program for new customers: proactive check-ins at months 1, 3, 6, and 12; usage education; and early access to service bundles. The 47.7% first-year churn rate is the clearest signal that new customers are not being won over.</div>
+        <div class="rc-impact">↓ Could halve new-customer churn with structured touchpoints</div>
+      </div>
+      <div class="rec-card">
+        <div class="rc-priority p2">Priority 2 — Short-term</div>
+        <div class="rc-title">Investigate Fiber Optic Value Gap</div>
+        <div class="rc-body">Commission a customer satisfaction study focused on fiber optic subscribers. Given the 41.9% churn rate — and the premium pricing these customers carry — there is likely a gap between price paid and perceived quality or reliability. Consider service improvements, speed guarantees, or repricing strategies.</div>
+        <div class="rc-impact">↓ Addresses the highest-volume churn segment by service type</div>
+      </div>
+      <div class="rec-card">
+        <div class="rc-priority p2">Priority 2 — Short-term</div>
+        <div class="rc-title">Push Automatic Payment Enrollment</div>
+        <div class="rc-body">Incentivize switching from electronic check to automatic payment methods (bank transfer, credit card) with discounts or billing credits. The 30-percentage-point difference in churn rates makes this a high-ROI, low-friction initiative that also improves payment reliability.</div>
+        <div class="rc-impact">↓ Up to 30pp churn reduction for converted customers</div>
+      </div>
+      <div class="rec-card">
+        <div class="rc-priority p3">Priority 3 — Medium-term</div>
+        <div class="rc-title">Bundle Adoption Campaigns</div>
+        <div class="rc-body">Offer free trials or deeply discounted first months of Online Security, Tech Support, and Device Protection. Once customers use and rely on these services, they are far less likely to churn. Target month-to-month and first-year customers specifically, where these bundles would have the greatest compounding effect.</div>
+        <div class="rc-impact">↓ 25–28pp churn reduction for customers who adopt bundles</div>
+      </div>
+      <div class="rec-card">
+        <div class="rc-priority p3">Priority 3 — Medium-term</div>
+        <div class="rc-title">Senior Citizen Retention Program</div>
+        <div class="rc-body">Senior citizens churn at 41.7% vs 23.6% for other customers. This segment may benefit from simplified plans, dedicated support channels, or senior-specific pricing. A small team focused on this demographic could yield meaningful churn reductions at relatively low acquisition cost.</div>
+        <div class="rc-impact">↓ Addresses a high-risk demographic with targeted care</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. CONCLUSION -->
+  <div class="section">
+    <div class="section-label">07 · Conclusion &amp; Next Steps</div>
+    <h2>The Path Forward</h2>
+    <p>The customer churn analysis presents a clear and consistent picture: churn is not random — it is concentrated in predictable, addressable segments. Month-to-month contracts, fiber optic internet, electronic check payments, and the absence of value-added services collectively explain the large majority of attrition. These are structural vulnerabilities, not one-off anomalies.</p>
+    <div class="callout">
+      <div class="callout-title">💡 The Core Insight</div>
+      <p>Customers who are locked in (by contract), connected (through service bundles), committed (via auto-pay), and satisfied (by quality that matches price) do not churn. Every recommendation above is an operationalization of this principle.</p>
+    </div>
+    <h3>Prioritized 90-Day Action Plan</h3>
+    <ol class="steps">
+      <li><b>Week 1–2: Identify and segment at-risk customers</b> — Build a churn risk score using the five key drivers identified in this report. Flag customers who are month-to-month, in their first year, on fiber optic, and paying by electronic check as highest priority.</li>
+      <li><b>Week 2–4: Launch contract upgrade campaign</b> — Target the top 20% highest-risk customers with personalized offers to move to annual contracts. Test 2–3 offer structures and measure conversion rates weekly.</li>
+      <li><b>Month 2: Roll out onboarding program for new customers</b> — Implement automated touchpoints at days 7, 30, 60, 90, and 180. Assign a customer success representative to cohorts in their first 3 months.</li>
+      <li><b>Month 2–3: Launch bundle trial program</b> — Offer 60-day free trials of Online Security and Tech Support to at-risk segments. Track activation, engagement, and churn rates of trial vs control groups.</li>
+      <li><b>Month 3: Fiber optic service review</b> — Complete internal audit of fiber optic complaint tickets, NPS scores, and service uptime data. Develop a remediation or repricing strategy based on findings.</li>
+      <li><b>Ongoing: Monthly churn dashboard review</b> — Use the ChurnIQ Dashboard delivered alongside this report to monitor churn rates across segments in real time and track the impact of interventions over time.</li>
+    </ol>
+  </div>
+
+</div>
+
+<div class="report-footer">
+  <span>Customer Churn Analysis · Telecom Dataset</span>
+  <span>7,043 customers · Python pandas analysis</span>
+  <span>Confidential — For Internal Use</span>
+</div>
+
+</div>
+</body>
+</html>
