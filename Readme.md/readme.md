@@ -23,7 +23,9 @@ _.Analyzing customer churn to identify key factors influencing retention and sup
 - [Author & Contact](#author--contact)
 
 
-## Customer Churn Analysis – Telecom Dataset
+
+
+## Overview - Customer Churn Analysis
 
 This project explores customer churn in a telecom dataset to understand why customers leave. The analysis focuses on cleaning the data, exploring patterns, and using visualizations to highlight key trends that can help improve customer retention.
 
@@ -89,12 +91,19 @@ Compared churn across different contract types and services
 Used visualizations to better understand customer behavior
 
 
-## Research Questions & Key Findings
+## Research Questions
 
-Customers with shorter tenure tend to churn more
-Month-to-month contracts show higher churn compared to long-term contracts
-Higher monthly charges are often linked with increased churn
-Customers on long-term plans are more likely to stay
+- Which customer groups are more likely to churn?
+- How does tenure affect customer retention?
+- Does contract type influence churn behavior?
+- What is the relationship between monthly charges and churn?
+
+## Key Findings
+
+- Customers with shorter tenure tend to churn more
+- Month-to-month contracts show higher churn compared to long-term contracts
+- Higher monthly charges are often linked with increased churn
+- Customers on long-term plans are more likely to stay
 
 
 ## Dashboard
@@ -109,7 +118,7 @@ AI tools were used to help improve the dashboard’s design and layout
 
 Clone the repository:
 
-git clone https://github.com/yourusername/customer-churn-analysis.git
+git clone https://github.com/zainbaloach/churn-data-analysis-python.git
 
 notebooks/churn_analysis.ipynb
 
@@ -126,8 +135,9 @@ Improve services that directly impact customer experience
 
 ## Author & Contact
 
-Zain
-Aspiring Data Analyst
-📧 Email: zainbaloach008@gmail.com
-🔗 LinkedIn: your-link-here
+Zain  
+Aspiring Data Analyst  
+
+📧 Email: zainbaloach008@gmail.com  
+🔗 LinkedIn: your-link-here  
 🔗 GitHub: your-github-link
