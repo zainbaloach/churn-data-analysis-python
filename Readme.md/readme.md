@@ -3,6 +3,18 @@
 _.Analyzing customer churn to identify key factors influencing retention and support data-driven decision-making using Python._
 
 
+
+
+# Churn Data Analysis Project
+
+## Live Dashboard
+https://zainbaloach.github.io/churn-data-analysis-python/
+
+## Project Files
+- Dashboard: Dashboard.html  
+- Report: Churn_Data_Analysis_Report.html
+
+
 ---
 
 ## Table of Contents
@@ -112,6 +124,7 @@ A dashboard was created to visualize churn patterns and key insights
 It highlights customer segments, churn distribution, and important factors
 AI tools were used to help improve the dashboard’s design and layout
 
+https://zainbaloach.github.io/churn-data-analysis-python/
 
 
 ## How to Run This Project
